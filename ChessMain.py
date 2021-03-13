@@ -23,10 +23,28 @@ def main():
     gameState = ChessEngine.GameState()
     loadImages()
     running = True
+    selected = ()
+    playerClicks = [] #keep tracks of player clicks [(6, 5), (4, 5)]
     while running:
         for e in g.event.get():
             if e.type == g.QUIT:
                 running = False
+            elif e.type == g.MOUSEBUTTONDOWN: #click and drag implementation
+                location = g.mouse.get_pos() #keep account for extra UI elements, make sure mouse location is relative to border
+                y = location[0] // squareSize
+                x = location[1] // squareSize
+                if selected == (x, y): #checks to see if user clicks the same square - undo
+                    selected = ()
+                    playerClicks = []
+                else:
+                    selected = (x, y)
+                    playerClicks.append(selected)
+                if len(playerClicks) == 2: #make move after finalizing click
+                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gameState.board)
+                    print(move.getChessNotation())
+                    gameState.makeMove(move)
+                    selected = ()
+                    playerClicks = []
         drawGameState(screen, gameState)
         clock.tick(maxFPS)
         g.display.flip()
