@@ -4,6 +4,9 @@ Move two squares if and only if first move
 Capture diagonally
 
 Rook:
+Move along a rank or a file (check all 4 directions)
+Check for an open square
+Capture horizontally/vertically
 
 Knight:
 

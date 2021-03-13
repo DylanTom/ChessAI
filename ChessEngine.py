@@ -6,7 +6,7 @@ class GameState():
         self.board = [
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
             ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
-            ["--", "--", "--", "wP", "--", "--", "--", "--"], #Represent an empty space
+            ["--", "--", "--", "--", "--", "--", "--", "--"], #Represent an empty space
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
@@ -63,17 +63,52 @@ class GameState():
                 if rank == 1 and self.board[rank + 2][file] == "--":
                     moves.append(Move((rank, file), (rank + 2, file), self.board))
             if file - 1 >= 0:
-                if self.board[rank+1][file-1][0] == "2":
+                if self.board[rank+1][file-1][0] == "w":
                     moves.append(Move((rank, file), (rank + 1, file-1), self.board))
             if file + 1 <= len(self.board[rank]) - 1:
-                if self.board[rank + 1][file + 1][0] == "2":
+                if self.board[rank + 1][file + 1][0] == "w":
                     moves.append(Move((rank, file), (rank + 1, file + 1), self.board))
 
     def getBishopMoves(self, rank, file, moves):
         pass
 
     def getRookMoves(self, rank, file, moves):
-        pass
+        same = ""
+        opposite = ""
+        if self.whiteToMove:
+            same = "w"
+            opposite = "b"
+        else:
+            same = "b"
+            opposite = "w"
+        #right
+        if file + 1 <= len(self.board[rank])-1:
+            for i in range(len(self.board[rank])- 1-file):
+                if self.board[rank][file+i+1][0] == same:
+                    break
+                elif self.board[rank][file+i+1] == "--" or self.board[rank][file+i+1][0] == opposite:
+                    moves.append(Move((rank, file), (rank, file+i+1), self.board))
+        #left
+        if file - 1 >= 0:
+            for i in range(file):
+                if self.board[rank][file-i-1][0] == same:
+                    break
+                elif self.board[rank][file-i-1] == "--" or self.board[rank][file-i-1][0] == opposite:
+                    moves.append(Move((rank, file), (rank, file-i-1), self.board))
+        #up
+        if rank - 1 >=0:
+            for i in range(rank):
+                if self.board[rank-i-1][file][0] == same:
+                    break
+                elif self.board[rank-i-1][file] == "--" or self.board[rank-i-1][file][0] == opposite:
+                    moves.append(Move((rank, file), (rank-i-1, file), self.board))
+        #down
+        if rank+1<= len(self.board[file])-1:
+            for i in range(len(self.board[file]) - 1 - rank):
+                if self.board[rank+i+1][file][0] == same:
+                    break
+                elif self.board[rank+i+1][file] == "--" or self.board[rank+i+1][file][0] == opposite:
+                    moves.append(Move((rank, file), (rank+i+1, file), self.board))
 
     def getKnightMoves(self, rank, file, moves):
         pass
