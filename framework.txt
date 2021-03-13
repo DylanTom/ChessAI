@@ -1,0 +1,11 @@
+Generate Board
+  -using 2D vectors make the grid, but I can't color the grids in with alternating color
+  -used an array to make the grid, had trouble understanding transforming game object position
+  -alternated b/w pieces using (file + rank) % 2; if 0, black; if 1, white
+  -in order to index the array, I labeled each square relative to the grid position (i.e. (1,1) --> 9) using the general formula (i,j) = i + 8*j
+  -Using an array is more difficult to store images and lock in to a grid; attempting to use a cell structure 
+  -I wasn't having difficulty writing the code, using prefabs and learning Unity was challenging
+Add Pieces
+Selection of Pieces
+Legal Moves
+Special Moves
