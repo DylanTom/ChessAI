@@ -1,0 +1,22 @@
+Pawn:
+Move one square up (if white) down (if black) - cannot move backwards
+Move two squares if and only if first move
+Capture diagonally
+
+Rook:
+
+Knight:
+
+Bishop:
+
+Queen:
+
+King:
+
+PIECES CANNOT MOVE IT IS GOING TO CAUSE A CHECK
+-Look at all moves
+-Filter moves
+    -make the move
+    -generate all possible moves for opposing players
+    -see if there is a check
+-return list of valid moves

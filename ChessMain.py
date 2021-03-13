@@ -17,14 +17,19 @@ def loadImages():
 
 def main():
     g.init()
+    g.display.set_caption('ChessAI')
     screen = g.display.set_mode((width, height))
     clock = g.time.Clock()
     screen.fill(g.Color("white"))
     gameState = ChessEngine.GameState()
+    validMoves = gameState.getValidMoves()
+    moveMade = False
+
     loadImages()
     running = True
     selected = ()
-    playerClicks = [] #keep tracks of player clicks [(6, 5), (4, 5)]
+    playerClicks = []
+
     while running:
         for e in g.event.get():
             if e.type == g.QUIT:
@@ -42,9 +47,19 @@ def main():
                 if len(playerClicks) == 2: #make move after finalizing click
                     move = ChessEngine.Move(playerClicks[0], playerClicks[1], gameState.board)
                     print(move.getChessNotation())
-                    gameState.makeMove(move)
+                    if move in validMoves:
+                        gameState.makeMove(move)
+                        moveMade = True
                     selected = ()
                     playerClicks = []
+            elif e.type == g.KEYDOWN: #need to only allow one undo per move
+                if e.key == g.K_z:
+                    gameState.undoMove()
+                    moveMade = True
+        if moveMade:
+            validMoves = gameState.getValidMoves()
+            moveMade = False
+
         drawGameState(screen, gameState)
         clock.tick(maxFPS)
         g.display.flip()
