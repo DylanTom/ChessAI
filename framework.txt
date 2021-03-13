@@ -5,6 +5,7 @@ Generate Board
   -in order to index the array, I labeled each square relative to the grid position (i.e. (1,1) --> 9) using the general formula (i,j) = i + 8*j
   -Using an array is more difficult to store images and lock in to a grid; attempting to use a cell structure 
   -I wasn't having difficulty writing the code, using prefabs and learning Unity was challenging
+  -Switched to pycharm and python for project
 Add Pieces
 Selection of Pieces
 Legal Moves
