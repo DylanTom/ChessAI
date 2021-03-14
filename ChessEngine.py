@@ -24,6 +24,8 @@ class GameState():
         self.inCheck = False
         self.pins = []
         self.checks = []
+        self.checkmate = False
+        self.stalemate = False
 
     def makeMove(self, move): #doesn't account for castling
         self.board[move.startRank][move.startFile] = "--"
@@ -48,7 +50,7 @@ class GameState():
             kingRank = self.blackKingLocation[0]
             kingFile = self.blackKingLocation[1]
         if self.inCheck:
-            if len(self.inCheck) == 1:
+            if len(self.checks) == 1:
                 moves = self.getAllPossibleMoves()
                 check = self.checks[0]
                 checkRank = check[0]
@@ -61,16 +63,25 @@ class GameState():
                     for i in range(1,8):
                         validSquare = (kingRank + check[2] *i , kingFile + check[3]*i)
                         validSquares.append(validSquare)
-                        if validSquard[0] ==checkRank and validSquare[1] == checkFile:
+                        if validSquare[0] == checkRank and validSquare[1] == checkFile:
                             break
                 for i in range(len(moves)-1,-1,-1):
                     if moves[i].pieceMoved[1] != "K":
-                        if not (moves[i].endRank, moves[i].endFile) in validSuqares:
+                        if not (moves[i].endRank, moves[i].endFile) in validSquares:
                             moves.remove(moves[i])
             else:
-                self.getKingMoves (kingRank, kingFile, moves)
+                self.getKingMoves(kingRank, kingFile, moves)
         else:
             moves = self.getAllPossibleMoves()
+        #checkmate and stalemate
+        if len(moves) == 0:
+            if self.inCheck:
+                self.checkmate = True
+            else:
+                self.stalemate = True
+        else:
+            self.checkmate = False
+            self.stalemate = False
 
         return moves
 
@@ -87,7 +98,7 @@ class GameState():
 
     def getPawnMoves(self, rank, file, moves): #need to do pawn promotion, en passant
         piecePinned = False
-        pinDirection =  ()
+        pinDirection =()
         for i in range(len(self.pins)-1, -1,-1):
             if self.pins[i][0] == rank and self.pins[i][1] == file:
                 piecePinned = True
@@ -243,7 +254,7 @@ class GameState():
             ally = "b"
             startRank = self.blackKingLocation[0]
             startFile = self.blackKingLocation[1]
-        directions = ((-1,1), (-1,-1), (1,1),(1,-1), (1,0), (0,1), (-1,0),(0,-1))
+        directions = ((-1,0), (0,-1), (1,0),(0,1), (-1,-1), (-1,1), (1,-1),(1,1))
         for i in range(len(directions)):
             d = directions[i]
             possiblePin = ()
@@ -252,20 +263,21 @@ class GameState():
                 endFile = startFile + d[1] * j
                 if 0 <= endRank < len(self.board) and 0 <= endFile < len(self.board):
                     endPiece = self.board[endRank][endFile]
-                    if endPiece[0]== ally and endPiece[1] != "K":
+                    if endPiece[0] == ally and endPiece[1] != "K":
                         if possiblePin == ():
                             possiblePin = (endRank, endFile, d[0], d[1])
                         else:
                             break
                     elif endPiece[0] == enemy:
+                        type = endPiece[1]
                         #orthogonal direction and piece is rook
                         #diagonal direction and piece is bishop
                         #1 square away pawn
                         #any direction queen
                         #cannot enter squares controlled by other king
-                        if (4 <= i <= 7 and type == "R") or \
-                                (0<= i <=3 and type == "B") or \
-                                (j==1 and type == "P" and ((enemy== 'w' and 2<= i <= 3) or (enemy == 'b' and 0<=i<=1))) or \
+                        if (0 <= i <= 3 and type == "R") or \
+                                (4<= i <=7 and type == "B") or \
+                                (j == 1 and type == "P" and ((enemy == 'w' and 6 <= i <= 7) or (enemy == 'b' and 4 <= i <= 5))) or \
                                 (type == 'Q') or (j == 1 and type == 'K'):
                             if possiblePin == ():
                                 inCheck = True
