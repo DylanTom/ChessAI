@@ -6,7 +6,7 @@ class GameState():
         self.board = [
             ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
             ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"], #Represent an empty space
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
@@ -26,12 +26,29 @@ class GameState():
         self.checks = []
         self.checkmate = False
         self.stalemate = False
+        self.enpassantAvailable = ()
 
     def makeMove(self, move): #doesn't account for castling
         self.board[move.startRank][move.startFile] = "--"
         self.board[move.endRank][move.endFile] = move.pieceMoved
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
+        if move.pieceMoved == 'wK':
+            self.whiteKingLocation = (move.endRank, move. endFile)
+        elif move.pieceMoved == 'bK':
+            self.blackKingLocation = (move.endRank, move.endFile)
+
+        if move.pawnPromoted:
+            #promotedPiece = input("Promote to Q, R, B, or N")
+            self.board[move.endRank][move.endFile] = move.pieceMoved[0] + 'Q' #promotedPiece
+
+        if move.enPassant:
+            self.board[move.startRank][move.endFile] = '--'
+
+        if move.pieceMoved[1] == "P" and abs(move.startRank - move.endRank) == 2:
+            self.enpassantAvailable = ((move.startRank + move.endRank)// 2, move.endFile)
+        else:
+            self.enpassantAvailable = ()
 
     def undoMove(self):
         if len(self.moveLog) != 0:
@@ -39,6 +56,19 @@ class GameState():
             self.board[move.startRank][move.startFile] = move.pieceMoved
             self.board[move.endRank][move.endFile] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
+
+        if move.pieceMoved == "wK":
+            self.whiteKingLocation = (move.startRank, move.startFile)
+        elif move.pieceMoved == "bK":
+            self.blackKingLocation = (move.startRank, move.startFile)
+
+        if move.enPassant:
+            self.board[move.endRank][move.endFile] = "--"
+            self.board[move.startRank][move.endFile] = move.pieceCaptured
+            self.enpassantAvailable = (move.endRank, move.endFile)
+
+        if move.pieceMoved[1] == 'P' and abs(move.startRank - move.endRank) == 2:
+            self.enpassantAvailable = ()
 
     def getValidMoves(self):
         moves = []
@@ -96,7 +126,7 @@ class GameState():
                     self.moveFunctions[piece](rank, file, moves)
         return moves
 
-    def getPawnMoves(self, rank, file, moves): #need to do pawn promotion, en passant
+    def getPawnMoves(self, rank, file, moves):
         piecePinned = False
         pinDirection =()
         for i in range(len(self.pins)-1, -1,-1):
@@ -107,33 +137,40 @@ class GameState():
                 break
 
         if self.whiteToMove:
-            if self.board[rank-1][file] == "--":
-                if not piecePinned or pinDirection == (-1,0):
-                    moves.append(Move((rank, file), (rank - 1, file), self.board))
-                    if rank == 6 and self.board[rank - 2][file] == "--":
-                        moves.append(Move((rank, file), (rank - 2, file), self.board))
-            if file-1 >= 0:
-                if self.board[rank-1][file-1][0] == "b":
-                    if not piecePinned or pinDirection == (-1, -1):
-                        moves.append(Move((rank, file), (rank - 1, file-1), self.board))
-            if file + 1 <= len(self.board[rank]) - 1:
-                if self.board[rank - 1][file + 1][0] == "b":
-                    if not piecePinned or pinDirection == (-1, 1):
-                        moves.append(Move((rank, file), (rank - 1, file + 1), self.board))
+            moveAmount = -1
+            startRank = 6
+            backRank = 0
+            enemy = 'b'
         else:
-            if self.board[rank+1][file] == "--":
-                if not piecePinned or pinDirection == (1, 0):
-                    moves.append(Move((rank, file), (rank + 1, file), self.board))
-                    if rank == 1 and self.board[rank + 2][file] == "--":
-                        moves.append(Move((rank, file), (rank + 2, file), self.board))
-            if file - 1 >= 0:
-                if self.board[rank+1][file-1][0] == "w":
-                    if not piecePinned or pinDirection == (1,-1):
-                        moves.append(Move((rank, file), (rank + 1, file-1), self.board))
-            if file + 1 <= len(self.board[rank]) - 1:
-                if self.board[rank + 1][file + 1][0] == "w":
-                    if not piecePinned or pinDirection == (1,1):
-                        moves.append(Move((rank, file), (rank + 1, file + 1), self.board))
+            moveAmount = 1
+            startRank = 1
+            backRank = 7
+            enemy = 'w'
+        pawnPromoted = False
+
+        if self.board[rank+moveAmount][file] == "--":
+            if not piecePinned or pinDirection == (moveAmount,0):
+                if rank + moveAmount == backRank:
+                    pawnPromoted = True
+                moves.append(Move((rank, file), (rank +moveAmount, file), self.board, pawnPromoted=pawnPromoted))
+                if rank == startRank and self.board[rank + 2 * moveAmount][file] == "--":
+                    moves.append(Move((rank, file), (rank + 2 * moveAmount, file), self.board))
+        if file-1 >= 0:
+            if not piecePinned or pinDirection == (moveAmount, -1):
+                if self.board[rank + moveAmount][file - 1][0] == enemy:
+                    if rank + moveAmount == backRank:
+                        pawnPromoted = True
+                    moves.append(Move((rank, file), (rank - 1, file-1), self.board, pawnPromoted = pawnPromoted))
+                if (rank + moveAmount, file -1) == self.enpassantAvailable:
+                    moves.append(Move((rank, file), (rank - 1, file - 1), self.board, enpassant=True))
+        if file + 1 <= len(self.board[rank]) - 1:
+            if not piecePinned or pinDirection == (moveAmount, 1):
+                if self.board[rank + moveAmount][file + 1][0] == enemy:
+                    if rank + moveAmount == backRank:
+                        pawnPromoted = True
+                    moves.append(Move((rank, file), (rank - 1, file + 1), self.board, pawnPromoted=pawnPromoted))
+                if (rank + moveAmount, file - 1) == self.enpassantAvailable:
+                    moves.append(Move((rank, file), (rank - 1, file + 1), self.board, enpassant=True))
 
     def getBishopMoves(self, rank, file, moves):
         piecePinned = False
@@ -307,13 +344,19 @@ class Move():
     filesToCols = {"h": 7, "g": 6, "f": 5, "e": 4, "d": 3, "c": 2, "b": 1, "a": 0}
     colsToFiles = {v: k for k, v in filesToCols.items()}
 
-    def __init__(self, startSquare, endSquare, board):
+    def __init__(self, startSquare, endSquare, board, enpassant = False, pawnPromoted = False):
         self.startRank = startSquare[0]
         self.startFile = startSquare[1]
         self.endRank = endSquare[0]
         self.endFile = endSquare[1]
         self.pieceMoved = board[self.startRank][self.startFile]
         self.pieceCaptured = board[self.endRank][self.endFile]
+        #self.promotionChoice = 'Q' #have to add a parameter
+        self.pawnPromoted = pawnPromoted
+        self.enPassant = enpassant
+        if self.enPassant:
+            self.pieceCaptured = 'wP' if self.pieceMoved == 'bP' else "bP"
+
         self.moveID = self.startRank * 1000 + self.startFile * 100 + self.endRank * 10 + self.endFile #maybe try using binary (0-64) start to end
 
     def __eq__(self,other):

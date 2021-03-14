@@ -6,7 +6,6 @@ Generate Board
   -Using an array is more difficult to store images and lock in to a grid; attempting to use a cell structure 
   -I wasn't having difficulty writing the code, using prefabs and learning Unity was challenging
   -Switched to pycharm and python for project
-Add Pieces
-Selection of Pieces
 Legal Moves
+  -See logic.txt
 Special Moves
