@@ -70,7 +70,20 @@ class GameState():
                     moves.append(Move((rank, file), (rank + 1, file + 1), self.board))
 
     def getBishopMoves(self, rank, file, moves):
-        pass
+        bishopMoves = ((-1,1), (-1,-1), (1,1),(1,-1))
+        enemy = "b" if self.whiteToMove else "w"
+        for i in bishopMoves:
+            for d in range(1, 8):
+                endRank = rank + i[0] * d
+                endFile = file + i[1] * d
+                if 0 <= endRank < len(self.board) and 0 <= endFile < len(self.board):
+                    endPiece = self.board[endRank][endFile]
+                    if endPiece[0] == enemy or endPiece == "--":
+                        moves.append(Move((rank, file), (endRank, endFile), self.board))
+                    else:
+                        break
+                else:
+                    break
 
     def getRookMoves(self, rank, file, moves):
         same = ""
@@ -111,13 +124,30 @@ class GameState():
                     moves.append(Move((rank, file), (rank+i+1, file), self.board))
 
     def getKnightMoves(self, rank, file, moves):
-        pass
+        knightMoves = ((-2,1), (-2,-1), (-1,-2), (-1,2), (1,2), (1,-2),(2,-1),(2,1))
+        enemy = "b" if self.whiteToMove else "w"
+        for i in knightMoves:
+            endRank = rank + i[0]
+            endFile = file + i[1]
+            if 0 <= endRank < len(self.board) and 0 <= endFile < len(self.board):
+                endPiece = self.board[endRank][endFile]
+                if endPiece[0] == enemy or endPiece == "--":
+                    moves.append(Move((rank, file), (endRank, endFile), self.board))
 
     def getQueenMoves(self, rank, file, moves):
-        pass
+        self.getRookMoves(rank, file, moves)
+        self.getBishopMoves(rank, file, moves)
 
     def getKingMoves(self, rank, file, moves):
-        pass
+        kingMoves = ((-1,1), (-1,-1), (1,1),(1,-1), (1,0), (0,1), (-1,0),(0,-1))
+        enemy = "b" if self.whiteToMove else "w"
+        for i in kingMoves:
+            endRank = rank + i[0]
+            endFile = file + i[1]
+            if 0<= endRank < len(self.board) and 0<= endFile < len(self.board):
+                endPiece = self.board[endRank][endFile]
+                if endPiece[0] == enemy or endPiece == "--":
+                    moves.append(Move((rank, file), (endRank, endFile), self.board))
 
 class Move():
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 2, "7":  1, "8": 0}
