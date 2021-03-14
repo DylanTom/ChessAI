@@ -50,8 +50,10 @@ def main():
                     if move in validMoves:
                         gameState.makeMove(move)
                         moveMade = True
-                    selected = ()
-                    playerClicks = []
+                        selected = ()
+                        playerClicks = []
+                    else:
+                        playerClicks = [selected]
             elif e.type == g.KEYDOWN: #need to only allow one undo per move
                 if e.key == g.K_z:
                     gameState.undoMove()

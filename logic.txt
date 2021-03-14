@@ -22,4 +22,9 @@ PIECES CANNOT MOVE IT IS GOING TO CAUSE A CHECK
     -make the move
     -generate all possible moves for opposing players
     -see if there is a check
+
+    -look at king; think about all the lines that can attack the king
+    -need to check for pins
+    -check knights
+    -check double checks
 -return list of valid moves
