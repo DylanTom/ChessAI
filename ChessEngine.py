@@ -164,10 +164,8 @@ class GameState():
             self.stalemate = False
 
         if self.whiteToMove:
-            print('hello')
             self.getCastleMoves(self.whiteKingLocation[0], self.whiteKingLocation[1], moves)
         else:
-            print('bye')
             self.getCastleMoves(self.blackKingLocation[0], self.blackKingLocation[1], moves)
 
         self.enpassantAvailable = tempEnPassant
