@@ -9,3 +9,5 @@ Generate Board
 Legal Moves
   -See logic.txt
 Special Moves
+
+-add right click to add arrows
