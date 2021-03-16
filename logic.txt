@@ -31,3 +31,5 @@ PIECES CANNOT MOVE IT IS GOING TO CAUSE A CHECK
 
 have to debug, it is not reading the if statement self.check
 function works; if else self.check DOESNT
+
+bishop and rook are not checking to see if there is an ally piece; adding illegal moves to valid moves

@@ -1,13 +1,17 @@
 #Driver File - handling user input and displaying current gameState
 
 import pygame as g
-from ChessAI import ChessEngine
+import sys
+from ChessAI import ChessEngine, SmartMoveFinder
 
 width = height = 512
 dimension = 8
 squareSize = height // dimension
 maxFPS = 60
 images = {}
+g.init()
+g.display.set_caption('ChessAI')
+screen = g.display.set_mode((width, height))
 
 #want to load in images at the beginning, pygame takes a lot of resources to load images each frame
 def loadImages():
@@ -15,10 +19,36 @@ def loadImages():
     for piece in pieces:
         images[piece]= g.transform.scale(g.image.load("Pieces/" + piece + ".png"), (squareSize,squareSize))
 
+def main_menu():
+    while True:
+        screen.fill((0,0,0))
+        drawText(screen, 'main menu')
+
+        mx, my = g.mouse.get_pos()
+
+        button1 = g.Rect(width/2,height/2, 50, 50)
+        if button1.collidepoint((mx, my)):
+            if click:
+                main()
+        g.draw.rect(screen, (255,0,0), button1)
+        click = False
+
+        for event in g.event.get():
+            if event.type == g.QUIT:
+                g.quit()
+                sys.exit()
+            if event.type == g.KEYDOWN:
+                if event.key == g.K_ESCAPE:
+                    g.quit()
+                    sys.exit()
+            if event.type == g.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        g.display.update()
+        g.time.Clock().tick(60)
+
 def main():
-    g.init()
-    g.display.set_caption('ChessAI')
-    screen = g.display.set_mode((width, height))
     clock = g.time.Clock()
     screen.fill(g.Color("white"))
     gameState = ChessEngine.GameState()
@@ -31,13 +61,16 @@ def main():
     playerClicks = []
     animate = False
     gameOver = False
+    playerWhite = False
+    playerBlack = True
 
     while running:
+        humanTurn = (gameState.whiteToMove and playerWhite) or (not gameState.whiteToMove and playerBlack)
         for e in g.event.get():
             if e.type == g.QUIT:
                 running = False
             elif e.type == g.MOUSEBUTTONDOWN: #click and drag implementation
-                if not gameOver:
+                if not gameOver and humanTurn:
                     location = g.mouse.get_pos() #keep account for extra UI elements, make sure mouse location is relative to border
                     y = location[0] // squareSize
                     x = location[1] // squareSize
@@ -71,14 +104,18 @@ def main():
                     playerClicks = []
                     moveMade = False
                     animate = False
+        if not gameOver and not humanTurn:
+            move = SmartMoveFinder.findRandomMove(validMoves)
+            gameState.makeMove(move)
+            moveMade = True
+            animate = True
+
         if moveMade:
             if animate:
                 animation(gameState.moveLog[-1], screen, gameState.board, clock)
             validMoves = gameState.getValidMoves()
             moveMade = False
             animate = False
-
-
         drawGameState(screen, gameState, validMoves, selected)
 
         if gameState.checkmate:
@@ -156,4 +193,4 @@ def drawText(screen, text):
 
 
 if __name__ == "__main__":
-    main()
+    main_menu()

@@ -131,6 +131,7 @@ class GameState():
             kingFile = self.blackKingLocation[1]
         if self.inCheck:
             if len(self.checks) == 1:
+                print("check")
                 moves = self.getAllPossibleMoves()
                 check = self.checks[0]
                 checkRank = check[0]
@@ -218,18 +219,17 @@ class GameState():
                 if self.board[rank + moveAmount][file - 1][0] == enemy:
                     if rank + moveAmount == backRank:
                         pawnPromoted = True
-                    moves.append(Move((rank, file), (rank - 1, file-1), self.board, pawnPromoted = pawnPromoted))
+                    moves.append(Move((rank, file), (rank + moveAmount, file-1), self.board, pawnPromoted = pawnPromoted))
                 if (rank + moveAmount, file -1) == self.enpassantAvailable:
-                    print("available 1")
-                    moves.append(Move((rank, file), (rank - 1, file - 1), self.board, enPassant=True))
+                    moves.append(Move((rank, file), (rank + moveAmount, file - 1), self.board, enPassant=True))
         if file + 1 <= len(self.board[rank]) - 1:
             if not piecePinned or pinDirection == (moveAmount, 1):
                 if self.board[rank + moveAmount][file + 1][0] == enemy:
                     if rank + moveAmount == backRank:
                         pawnPromoted = True
-                    moves.append(Move((rank, file), (rank - 1, file + 1), self.board, pawnPromoted=pawnPromoted))
+                    moves.append(Move((rank, file), (rank + moveAmount, file + 1), self.board, pawnPromoted=pawnPromoted))
                 if (rank + moveAmount, file + 1) == self.enpassantAvailable:
-                    moves.append(Move((rank, file), (rank - 1, file +1), self.board, enPassant=True))
+                    moves.append(Move((rank, file), (rank + moveAmount, file +1), self.board, enPassant=True))
 
     def getBishopMoves(self, rank, file, moves):
         piecePinned = False
@@ -250,8 +250,11 @@ class GameState():
                 if 0 <= endRank < len(self.board) and 0 <= endFile < len(self.board):
                     if not piecePinned or pinDirection == i or pinDirection == (-i[0], -i[1]):
                         endPiece = self.board[endRank][endFile]
-                        if endPiece[0] == enemy or endPiece == "--":
+                        if endPiece == "--":
                             moves.append(Move((rank, file), (endRank, endFile), self.board))
+                        elif endPiece[0] == enemy:
+                            moves.append(Move((rank, file), (endRank, endFile), self.board))
+                            break
                         else:
                             break
                 else:
@@ -277,8 +280,11 @@ class GameState():
                 if 0 <= endRank < len(self.board) and 0 <= endFile < len(self.board):
                     if not piecePinned or pinDirection == i or pinDirection == (-i[0], -i[1]):
                         endPiece = self.board[endRank][endFile]
-                        if endPiece[0] == enemy or endPiece == "--":
+                        if endPiece == "--":
                             moves.append(Move((rank, file), (endRank, endFile), self.board))
+                        elif endPiece[0] == enemy:
+                            moves.append(Move((rank, file), (endRank, endFile), self.board))
+                            break
                         else:
                             break
                 else:
@@ -345,9 +351,10 @@ class GameState():
             self.getQueenSideCastleMoves(rank, file, moves)
 
     def getKingSideCastleMoves(self, rank, file, moves):
-        if self.board[rank][file+1] == "--" and self.board[rank][file+2]=='--':
-            if not self.squareUnderAttack(rank, file+1) and not self.squareUnderAttack(rank, file +2):
-                moves.append(Move((rank, file), (rank, file +2), self.board, isCastleMove = True))
+        if 0<= file +2 < len(self.board):
+            if self.board[rank][file+1] == "--" and self.board[rank][file+2]=='--':
+                if not self.squareUnderAttack(rank, file+1) and not self.squareUnderAttack(rank, file +2):
+                    moves.append(Move((rank, file), (rank, file +2), self.board, isCastleMove = True))
 
     def getQueenSideCastleMoves(self, rank, file, moves):
         if self.board[rank][file-1] == "--" and self.board[rank][file-2]=='--' and self.board[rank][file-3] == '--':
