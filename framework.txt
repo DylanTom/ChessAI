@@ -11,3 +11,10 @@ Legal Moves
 Special Moves
 
 -add right click to add arrows
+
+AI
+-Greedy
+-MinMax
+https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
+piece square table
+-Neural Network

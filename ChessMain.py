@@ -62,7 +62,7 @@ def main():
     animate = False
     gameOver = False
     playerWhite = False
-    playerBlack = True
+    playerBlack = False
 
     while running:
         humanTurn = (gameState.whiteToMove and playerWhite) or (not gameState.whiteToMove and playerBlack)
@@ -105,8 +105,10 @@ def main():
                     moveMade = False
                     animate = False
         if not gameOver and not humanTurn:
-            move = SmartMoveFinder.findRandomMove(validMoves)
-            gameState.makeMove(move)
+            AImove = SmartMoveFinder.findGreedyMove(gameState, validMoves)
+            if AImove is None:
+                AImove = SmartMoveFinder.findRandomMove(validMoves)
+            gameState.makeMove(AImove)
             moveMade = True
             animate = True
 
