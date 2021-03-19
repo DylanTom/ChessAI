@@ -13,6 +13,9 @@ g.init()
 g.display.set_caption('ChessAI')
 screen = g.display.set_mode((width, height))
 
+playerWhite = False
+playerBlack = False
+
 #want to load in images at the beginning, pygame takes a lot of resources to load images each frame
 def loadImages():
     pieces = ["bR", "bN", "bB", "bQ", "bK", "bP", "wP", "wR", "wN", "wB", "wQ", "wK"]
@@ -21,16 +24,21 @@ def loadImages():
 
 def main_menu():
     while True:
-        screen.fill((0,0,0))
-        drawText(screen, 'main menu')
+        screen.fill((255,255,255))
+        drawMenuText(screen, 'ChessAI: Main Menu')
 
         mx, my = g.mouse.get_pos()
 
-        button1 = g.Rect(width/2,height/2, 50, 50)
+        button1 = g.Rect(width/2-100,height/2-50, 200, 50)
+        button2 = g.Rect(width/2-100,height/2+50, 200, 50)
         if button1.collidepoint((mx, my)):
+            if click:
+                options()
+        if button2.collidepoint((mx, my)):
             if click:
                 main()
         g.draw.rect(screen, (255,0,0), button1)
+        g.draw.rect(screen, (0, 255,0), button2)
         click = False
 
         for event in g.event.get():
@@ -61,8 +69,8 @@ def main():
     playerClicks = []
     animate = False
     gameOver = False
-    playerWhite = False
-    playerBlack = True
+    #playerWhite = True
+    #playerBlack = True
 
     while running:
         humanTurn = (gameState.whiteToMove and playerWhite) or (not gameState.whiteToMove and playerBlack)
@@ -106,6 +114,8 @@ def main():
                     moveMade = False
                     animate = False
                     gameOver = False
+                if e.key == g.K_ESCAPE:
+                    running = False
         if not gameOver and not humanTurn:
             AImove = SmartMoveFinder.findBestMoveMinMax(gameState, validMoves)
             if AImove is None:
@@ -135,6 +145,24 @@ def main():
         clock.tick(maxFPS)
         g.display.flip()
 
+def options():
+    screen.fill(g.Color("white"))
+    running = True
+    while running:
+
+        for event in g.event.get():
+            if event.type == g.QUIT:
+                running = False
+            if event.type == g.KEYDOWN:
+                if event.key == g.K_ESCAPE:
+                    running = False
+            if event.type == g.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        g.display.update()
+        g.time.Clock().tick(60)
+
 def highlightSquares(screen, gameState, validMoves, selected):
     if selected != ():
         rank, file = selected
@@ -156,7 +184,7 @@ def drawGameState(screen, gameState, validMoves, selected):
 
 def drawBoard(screen):
     global colors
-    colors = [g.Color("white"), g.Color("gray")]
+    colors = [g.Color("white"), g.Color("dark gray")]
     for rank in range(dimension):
         for file in range(dimension):
             color = colors[(rank + file) % 2]
@@ -193,6 +221,12 @@ def drawText(screen, text):
     font = g.font.SysFont("Comic Sans", 32, True, False)
     textObject = font.render(text, 0,g.Color('Red'))
     textLocation = g.Rect(0,0,width, height).move(width/2 - textObject.get_width()/2, height/2 - textObject.get_height()/2)
+    screen.blit(textObject, textLocation)
+
+def drawMenuText(screen, text):
+    font = g.font.SysFont("Helvetica", 48, True, False)
+    textObject = font.render(text,0, g.Color('Blue'))
+    textLocation = g.Rect(0,0, width, height).move(width/2 - textObject.get_width()/2, height/2 - 6* textObject.get_height()/2)
     screen.blit(textObject, textLocation)
 
 

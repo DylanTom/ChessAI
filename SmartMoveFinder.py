@@ -1,9 +1,11 @@
 import random
+from ChessAI import PieceSquareTable
 
 pieceScore = {"K": 0, "Q": 9, "R": 5, "B": 3, "N":3, "P":1}
+
 checkmate = 1000
 stalemate = 0
-depth = 2
+depth = 3
 
 def findRandomMove(validMoves):
     return validMoves[random.randint(0, len(validMoves)-1)]
@@ -46,7 +48,7 @@ def findBestMove(gameState, validMoves):
 def findBestMoveMinMax(gameState, validMoves):
     global nextMove
     nextMove = None
-    findMinMaxMove(gameState, validMoves, depth, gameState.whiteToMove)
+    findMoveNegaMaxAB(gameState, validMoves, depth, -checkmate, checkmate, 1 if gameState.whiteToMove else -1)
     return nextMove
 
 def findMinMaxMove(gameState, validMoves, depthA, whiteToMove):
@@ -81,6 +83,44 @@ def findMinMaxMove(gameState, validMoves, depthA, whiteToMove):
             gameState.undoMove()
         return minScore
 
+def findMoveNegaMax(gameState, validMoves, depthA, turnMultiplier):
+    global nextMove
+    if depthA == 0:
+        return turnMultiplier * scoreBoard(gameState)
+
+    maxScore = -checkmate
+    for i in validMoves:
+        gameState.makeMove(i)
+        nextMoves = gameState.getValidMoves()
+        score = -findMoveNegaMax(gameState, nextMoves, depthA - 1, -turnMultiplier)
+        if score > maxScore:
+            maxScore = score
+            if depthA == depth:
+                nextMove = i
+        gameState.undoMove()
+    return maxScore
+
+def findMoveNegaMaxAB(gameState, validMoves, depthA, alpha, beta, turnMultiplier):
+    global nextMove
+    if depthA == 0:
+        return turnMultiplier * scoreBoard(gameState)
+
+    maxScore = -checkmate
+    random.shuffle(validMoves)
+    for i in validMoves:
+        gameState.makeMove(i)
+        nextMoves = gameState.getValidMoves()
+        score = -findMoveNegaMaxAB(gameState, nextMoves, depthA - 1,-beta, -alpha,-turnMultiplier)
+        if score > maxScore:
+            maxScore = score
+            if depthA == depth:
+                nextMove = i
+        gameState.undoMove()
+        if maxScore > alpha:
+            alpha = maxScore
+        if alpha >= beta:
+            break
+    return maxScore
 
 def scoreBoard(gameState):
     if gameState.checkmate:
@@ -95,9 +135,15 @@ def scoreBoard(gameState):
     for rank in gameState.board:
         for square in rank:
             if square[0] == "w":
-                score += pieceScore[square[1]]
+                if square[1] == "K" and gameState.inCheck:
+                    score += 100
+                else:
+                    score += pieceScore[square[1]]
             elif square[0] == "b":
-                score -= pieceScore[square[1]]
+                if square[1] == "K" and gameState.inCheck:
+                    score -= 100
+                else:
+                    score -= pieceScore[square[1]]
 
     return score
 
