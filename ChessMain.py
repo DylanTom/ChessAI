@@ -62,7 +62,7 @@ def main():
     animate = False
     gameOver = False
     playerWhite = False
-    playerBlack = False
+    playerBlack = True
 
     while running:
         humanTurn = (gameState.whiteToMove and playerWhite) or (not gameState.whiteToMove and playerBlack)
@@ -97,6 +97,7 @@ def main():
                     gameState.undoMove()
                     moveMade = True
                     animate = False
+                    gameOver = False
                 if e.key == g.K_r:
                     gameState = ChessEngine.GameState()
                     validMoves = gameState.getValidMoves()
@@ -104,8 +105,9 @@ def main():
                     playerClicks = []
                     moveMade = False
                     animate = False
+                    gameOver = False
         if not gameOver and not humanTurn:
-            AImove = SmartMoveFinder.findGreedyMove(gameState, validMoves)
+            AImove = SmartMoveFinder.findBestMoveMinMax(gameState, validMoves)
             if AImove is None:
                 AImove = SmartMoveFinder.findRandomMove(validMoves)
             gameState.makeMove(AImove)

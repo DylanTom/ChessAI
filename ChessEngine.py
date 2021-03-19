@@ -31,7 +31,7 @@ class GameState():
         self.castleRightsLog = [CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.bks,
                                              self.currentCastlingRights.wqs, self.currentCastlingRights.bqs)]
 
-    def makeMove(self, move): #doesn't account for castling
+    def makeMove(self, move):
         self.board[move.startRank][move.startFile] = "--"
         self.board[move.endRank][move.endFile] = move.pieceMoved
         self.moveLog.append(move)
@@ -96,6 +96,9 @@ class GameState():
         self.castleRightsLog.pop()
         self.currentCastlingRights = self.castleRightsLog[-1]
 
+        self.checkmate = False
+        self.stalemate = False
+
     def updateCastleRights(self, move):
         if move.pieceMoved == 'wk':
             self.currentCastlingRights.wks = False
@@ -131,7 +134,6 @@ class GameState():
             kingFile = self.blackKingLocation[1]
         if self.inCheck:
             if len(self.checks) == 1:
-                print("check")
                 moves = self.getAllPossibleMoves()
                 check = self.checks[0]
                 checkRank = check[0]

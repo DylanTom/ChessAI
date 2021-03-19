@@ -16,5 +16,12 @@ AI
 -Greedy
 -MinMax
 https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
-piece square table
+--does not consider if move places opponent in check
+--piece square table
 -Neural Network
+
+#not actively looking for checkmate; farming pieces
+#https://www.danheisman.com/evaluation-of-material-imbalances.html
+
+
+
